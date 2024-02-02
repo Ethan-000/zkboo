@@ -3,6 +3,7 @@ use rand::{CryptoRng, RngCore};
 use crate::config::KEY_LEN;
 
 pub type Key = [u8; KEY_LEN];
+#[derive(Clone, Default)]
 pub struct KeyManager {
     pub keys_bytes: Vec<u8>,
     num_of_accessible_keys: usize,

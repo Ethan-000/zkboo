@@ -19,7 +19,7 @@ pub struct PartyExecution<'a, T: Value> {
    Based on: O4 of (https://eprint.iacr.org/2017/279.pdf)
 */
 impl<'a, T: Value> PartyExecution<'a, T> {
-    pub fn commit<D: Default + Digest>(&self) -> Result<Commitment<D>, Error> {
+    pub fn commit<D: Default + Digest + Clone>(&self) -> Result<Commitment<D>, Error> {
         let blinding = Blinding(self.key);
         let messages_bytes: Vec<u8> = self
             .view
@@ -49,11 +49,17 @@ pub struct PublicInput<'a, T: Value> {
 // TODO: add methods for computing proofs size, etc.
 pub struct Proof<T: Value, D, const SIGMA: usize>
 where
-    D: Default + Digest,
+    D: Default + Digest + Clone,
 {
     pub party_inputs: Vec<Vec<u8>>,
     pub commitments: Vec<Commitment<D>>,
     pub views: Vec<View<T>>,
     pub keys: Vec<Key>,
     pub claimed_trits: Vec<u8>,
+}
+
+#[derive(Clone)]
+pub struct FirstMessageA<T: Value, D: Default + Digest + Clone> {
+    pub outputs: Vec<Vec<GF2Word<T>>>,
+    pub all_commitments: Vec<Commitment<D>>,
 }
