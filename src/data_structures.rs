@@ -47,6 +47,7 @@ pub struct PublicInput<'a, T: Value> {
 }
 
 // TODO: add methods for computing proofs size, etc.
+#[derive(Default)]
 pub struct Proof<T: Value, D, const SIGMA: usize>
 where
     D: Default + Digest + Clone,
