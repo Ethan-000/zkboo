@@ -58,7 +58,7 @@ where
     pub claimed_trits: Vec<u8>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct FirstMessageA<T: Value, D: Default + Digest + Clone> {
     pub outputs: Vec<Vec<GF2Word<T>>>,
     pub all_commitments: Vec<Commitment<D>>,
