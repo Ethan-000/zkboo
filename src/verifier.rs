@@ -189,6 +189,10 @@ where
         }
     }
 
+    pub fn set_challenge(&mut self, c: Vec<u8>) {
+        self.challenge = c;
+    }
+
     pub fn round2<R: RngCore + CryptoRng>(
         &mut self,
         rng: &mut R,
