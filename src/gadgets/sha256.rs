@@ -249,11 +249,12 @@ mod test_sha256 {
     use crate::{
         circuit::{Circuit, Output},
         error::Error,
-        gadgets::sha256::padding::padding,
+        gadgets::{sha256::padding::padding, verifier},
         gf2_word::GF2Word,
+        num_of_repetitions_given_desired_security,
         party::Party,
-        prover::Prover,
-        verifier::Verifier,
+        prover::{InteractiveProver, Prover},
+        verifier::{InteractiveVerifier, Verifier},
     };
 
     use super::{iv::init_iv, *};
@@ -420,5 +421,40 @@ mod test_sha256 {
         .unwrap();
 
         Verifier::<u32, ChaCha20Rng, Keccak256>::verify(&proof, &circuit, &output).unwrap();
+    }
+
+    #[test]
+    fn test_interactive() {
+        let mut rng = thread_rng();
+        const SIGMA: usize = 80;
+
+        let preimage = String::from("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu");
+
+        let circuit = Sha256Circuit {
+            preimage: preimage.clone(),
+        };
+
+        let output = circuit.compute(&[]);
+        let expected_output = crate::gadgets::sha256::test_vectors::long::DIGEST_OUTPUT;
+        for (&word, &expected_word) in output.iter().zip(expected_output.iter()) {
+            assert_eq!(word.value, expected_word);
+        }
+
+        let mut prover = InteractiveProver::<u32, ChaCha20Rng, Keccak256>::new();
+        let mut verifier = InteractiveVerifier::<u32, ChaCha20Rng, Keccak256>::new();
+
+        let fm = prover
+            .round1::<ThreadRng, SIGMA>(&mut rng, preimage.as_bytes(), &circuit, &output)
+            .unwrap();
+
+        let sm = verifier.round2(
+            &mut rng,
+            num_of_repetitions_given_desired_security(SIGMA),
+            fm,
+        );
+
+        let proof = prover.round3::<SIGMA>(sm).unwrap();
+
+        verifier.verify(&proof, &circuit, &output).unwrap();
     }
 }

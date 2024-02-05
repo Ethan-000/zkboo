@@ -11,7 +11,7 @@ use std::marker::PhantomData;
 
 use crate::{commitment::Commitment, data_structures::PublicInput, error::Error, gf2_word::Value};
 
-pub struct SigmaProtocolStatelessFiatShamir<D: Clone + Digest>(PhantomData<D>);
+pub struct SigmaProtocolStatelessFiatShamir<D: Clone + Digest + Clone>(PhantomData<D>);
 
 impl<D: Clone + Digest> SigmaProtocolStatelessFiatShamir<D> {
     pub fn sample_trits(seed: &[u8], public_data: &[u8], prover_msg: &[u8], r: usize) -> Vec<u8> {
@@ -58,11 +58,11 @@ impl<D: Clone + Digest> SigmaProtocolStatelessFiatShamir<D> {
     }
 }
 
-pub struct SigmaFS<D: Digest + FixedOutputReset> {
+pub struct SigmaFS<D: Digest + FixedOutputReset + Clone> {
     hasher: D,
 }
 
-impl<D: Default + Digest + FixedOutputReset> SigmaFS<D> {
+impl<D: Default + Digest + FixedOutputReset + Clone> SigmaFS<D> {
     pub fn initialize(seed: &[u8]) -> Self {
         let hasher = Digest::new_with_prefix(seed);
         Self { hasher }
