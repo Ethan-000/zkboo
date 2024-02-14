@@ -7,7 +7,7 @@ use crate::{
 pub type Output<T> = Vec<GF2Word<T>>;
 pub type TwoThreeDecOutput<T> = (Output<T>, Output<T>, Output<T>);
 
-pub trait Circuit<T: Value> {
+pub trait Circuit<T: Value + std::marker::Sync + std::marker::Send> {
     fn compute(&self, input: &[u8]) -> Vec<GF2Word<T>>;
 
     /// Decompose this circuit into 3 branches such that the values computed in
@@ -50,7 +50,7 @@ mod circuit_tests {
     #[derive(Clone, Copy)]
     struct SimpleCircuit1<T>(PhantomData<T>);
 
-    impl<T: Value> Circuit<T> for SimpleCircuit1<T> {
+    impl<T: Value + std::marker::Sync + std::marker::Send> Circuit<T> for SimpleCircuit1<T> {
         fn compute(&self, input: &[u8]) -> Vec<GF2Word<T>> {
             let x = generic_parse(input, self.party_input_len());
             vec![(x[0] ^ x[1]) & (x[2] ^ x[3]) & x[4]]

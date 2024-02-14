@@ -1,3 +1,4 @@
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use serde::Serialize;
 use sha3::Digest;
 
@@ -10,7 +11,7 @@ use crate::{
 };
 
 #[derive(Serialize)]
-pub struct PartyExecution<'a, T: Value> {
+pub struct PartyExecution<'a, T: Value + std::marker::Sync + std::marker::Send> {
     pub key: &'a Key,
     pub view: &'a View<T>,
 }
@@ -18,8 +19,10 @@ pub struct PartyExecution<'a, T: Value> {
 /*
    Based on: O4 of (https://eprint.iacr.org/2017/279.pdf)
 */
-impl<'a, T: Value> PartyExecution<'a, T> {
-    pub fn commit<D: Default + Digest + Clone>(&self) -> Result<Commitment<D>, Error> {
+impl<'a, T: Value + std::marker::Sync + std::marker::Send> PartyExecution<'a, T> {
+    pub fn commit<D: Default + Digest + Clone + std::marker::Sync + std::marker::Send>(
+        &self,
+    ) -> Result<Commitment<D>, Error> {
         let blinding = Blinding(self.key);
         let messages_bytes: Vec<u8> = self
             .view
@@ -39,7 +42,7 @@ impl<'a, T: Value> PartyExecution<'a, T> {
 }
 
 #[derive(Serialize)]
-pub struct PublicInput<'a, T: Value> {
+pub struct PublicInput<'a, T: Value + std::marker::Sync + std::marker::Send> {
     pub hash_len: usize,
     pub security_param: usize,
     pub public_output: &'a Vec<GF2Word<T>>,
@@ -48,9 +51,12 @@ pub struct PublicInput<'a, T: Value> {
 
 // TODO: add methods for computing proofs size, etc.
 #[derive(Default)]
-pub struct Proof<T: Value, D, const SIGMA: usize>
-where
-    D: Default + Digest + Clone,
+pub struct Proof<
+    T: Value + std::marker::Sync + std::marker::Send + std::marker::Send,
+    D,
+    const SIGMA: usize,
+> where
+    D: Default + Digest + Clone + std::marker::Sync + std::marker::Send,
 {
     pub party_inputs: Vec<Vec<u8>>,
     pub commitments: Vec<Commitment<D>>,
@@ -59,8 +65,11 @@ where
     pub claimed_trits: Vec<u8>,
 }
 
-#[derive(Clone, Default)]
-pub struct FirstMessageA<T: Value, D: Default + Digest + Clone> {
+#[derive(Clone, Default, CanonicalDeserialize, CanonicalSerialize)]
+pub struct FirstMessageA<
+    T: Value + std::marker::Sync + std::marker::Send,
+    D: Default + Digest + Clone + std::marker::Sync + std::marker::Send,
+> {
     pub outputs: Vec<Vec<GF2Word<T>>>,
     pub all_commitments: Vec<Commitment<D>>,
 }

@@ -6,12 +6,12 @@ use crate::{
 };
 
 /// A tape of values that can be read at its current `offset`.
-pub struct Tape<T: Value> {
+pub struct Tape<T: Value + std::marker::Sync + std::marker::Send> {
     offset: usize,
     tape: Vec<GF2Word<T>>,
 }
 
-impl<T: Value> Tape<T> {
+impl<T: Value + std::marker::Sync + std::marker::Send> Tape<T> {
     /// Initialise a tape with `len` entries using `key` as random seed.
     pub fn from_key<R: SeedableRng<Seed = Key> + RngCore + CryptoRng>(
         key: Key,

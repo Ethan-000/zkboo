@@ -3,6 +3,7 @@ use std::{
     ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr},
 };
 
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
 
@@ -230,15 +231,27 @@ impl GenRand for u128 {
 }
 
 /// A wrapper type for which we implement `BitAnd`, `BitXor`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub struct GF2Word<T: Value> {
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    CanonicalDeserialize,
+    CanonicalSerialize,
+)]
+pub struct GF2Word<T: Value + std::marker::Sync + std::marker::Send + ark_serialize::Valid> {
     /// The value represented by this GF2 word
     pub value: T,
     /// Number of bits in `T`
     pub size: usize,
 }
 
-impl<T: Value> From<T> for GF2Word<T> {
+impl<T: Value + std::marker::Sync + std::marker::Send + ark_serialize::Valid> From<T>
+    for GF2Word<T>
+{
     fn from(value: T) -> Self {
         GF2Word::<T> {
             value,
@@ -246,7 +259,7 @@ impl<T: Value> From<T> for GF2Word<T> {
         }
     }
 }
-impl<T: Value> BitAnd for GF2Word<T> {
+impl<T: Value + std::marker::Sync + std::marker::Send> BitAnd for GF2Word<T> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self {
@@ -257,7 +270,7 @@ impl<T: Value> BitAnd for GF2Word<T> {
     }
 }
 
-impl<T: Value> BitXor for GF2Word<T> {
+impl<T: Value + std::marker::Sync + std::marker::Send> BitXor for GF2Word<T> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self {

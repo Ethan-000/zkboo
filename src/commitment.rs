@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use serde::{Deserialize, Serialize};
 use sha3::Digest;
 
@@ -13,13 +14,24 @@ impl<T: Serialize> AsRef<T> for Blinding<T> {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Commitment<D: Default + Digest + Clone> {
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    CanonicalDeserialize,
+    CanonicalSerialize,
+)]
+pub struct Commitment<D: Default + Digest + Clone + std::marker::Sync + std::marker::Send> {
     pub data: [u8; HASH_LEN],
     _digest: PhantomData<D>,
 }
 
-impl<D: Default + Digest + Clone> Commitment<D> {
+impl<D: Default + Digest + Clone + std::marker::Sync + std::marker::Send> Commitment<D> {
     /// Commit to a given `message` using by hashing it with some `blinding`.
     pub fn commit<U: Serialize, T: Serialize>(
         blinding: &Blinding<U>,

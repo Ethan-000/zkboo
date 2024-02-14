@@ -8,12 +8,12 @@ use crate::{
 };
 
 /// A party in the MPC protocol has a random tape and a `View`.
-pub struct Party<T: Value> {
+pub struct Party<T: Value + std::marker::Sync + std::marker::Send> {
     pub tape: Tape<T>,
     pub view: View<T>,
 }
 
-impl<T: Value> Party<T> {
+impl<T: Value + std::marker::Sync + std::marker::Send> Party<T> {
     pub fn new<TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng>(
         share: Vec<u8>,
         k: Key,

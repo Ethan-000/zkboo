@@ -39,7 +39,7 @@ fn bit_and(input_p1: (Bit, Bit), input_p2: (Bit, Bit), r_p1: Bit, r_p2: Bit) -> 
         ^ (r_p1 ^ r_p2)
 }
 
-pub fn mpc_add_mod_k<T: Value>(
+pub fn mpc_add_mod_k<T: Value + std::marker::Sync + std::marker::Send>(
     input_p1: GF2Word<T>,
     input_p2: GF2Word<T>,
     input_p3: GF2Word<T>,
@@ -92,7 +92,7 @@ pub fn mpc_add_mod_k<T: Value>(
 
 /// Performs addition modulo 2^(T::bits_size)
 /// Works bit by bit and appends full carry in view, that's why it's counted as just one gate
-pub fn mpc_add_mod<T: Value>(
+pub fn mpc_add_mod<T: Value + std::marker::Sync + std::marker::Send>(
     input_p1: (GF2Word<T>, GF2Word<T>),
     input_p2: (GF2Word<T>, GF2Word<T>),
     input_p3: (GF2Word<T>, GF2Word<T>),
@@ -142,7 +142,7 @@ pub fn mpc_add_mod<T: Value>(
     (o1, o2, o3)
 }
 
-pub fn add_mod_verify<T: Value>(
+pub fn add_mod_verify<T: Value + std::marker::Sync + std::marker::Send>(
     input_p: (GF2Word<T>, GF2Word<T>),
     input_p_next: (GF2Word<T>, GF2Word<T>),
     p: &mut Party<T>,
@@ -178,7 +178,7 @@ pub fn add_mod_verify<T: Value>(
     (o1, o2)
 }
 
-pub fn add_mod_verify_k<T: Value>(
+pub fn add_mod_verify_k<T: Value + std::marker::Sync + std::marker::Send>(
     input_p: GF2Word<T>,
     input_p_next: GF2Word<T>,
     k: GF2Word<T>,
@@ -229,11 +229,11 @@ mod adder_tests {
         party::Party,
     };
 
-    pub struct AddModKCircuit<T: Value> {
+    pub struct AddModKCircuit<T: Value + std::marker::Sync + std::marker::Send> {
         pub k: GF2Word<T>,
     }
 
-    impl<T: Value> Circuit<T> for AddModKCircuit<T> {
+    impl<T: Value + std::marker::Sync + std::marker::Send> Circuit<T> for AddModKCircuit<T> {
         fn compute(&self, input: &[u8]) -> Vec<GF2Word<T>> {
             let input = generic_parse(input, self.party_input_len())[0];
             let res = adder(input.value, self.k.value);

@@ -6,13 +6,13 @@ use crate::gf2_word::{GF2Word, Value};
 /// - input: the party's initial share of the witness; and
 /// - messages: the messages sent to the party.
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct View<T: Value> {
+pub struct View<T: Value + std::marker::Sync + std::marker::Send> {
     offset: usize,
     pub input: Vec<u8>,
     pub messages: Vec<GF2Word<T>>,
 }
 
-impl<T: Value> View<T> {
+impl<T: Value + std::marker::Sync + std::marker::Send> View<T> {
     pub fn new(input: Vec<u8>) -> Self {
         Self {
             input,

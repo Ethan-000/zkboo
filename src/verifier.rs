@@ -1,4 +1,4 @@
-use std::{fmt::Debug, marker::PhantomData};
+use std::marker::PhantomData;
 
 use rand::{CryptoRng, Rng, RngCore, SeedableRng};
 
@@ -18,16 +18,16 @@ use crate::{
     tape::Tape,
 };
 
-pub struct Verifier<T: Value, TapeR, D>(PhantomData<(T, TapeR, D)>)
+pub struct Verifier<T: Value + std::marker::Sync, TapeR, D>(PhantomData<(T, TapeR, D)>)
 where
-    D: Digest + FixedOutputReset,
-    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng;
+    D: Digest + FixedOutputReset + std::marker::Sync + std::marker::Send,
+    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng + std::marker::Send;
 
 impl<T, TapeR, D> Verifier<T, TapeR, D>
 where
-    T: Value + PartialEq,
-    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng,
-    D: Clone + Default + Digest + FixedOutputReset,
+    T: Value + PartialEq + std::marker::Sync + std::marker::Send,
+    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng + std::marker::Send,
+    D: Clone + Default + Digest + FixedOutputReset + std::marker::Sync + std::marker::Send,
 {
     pub fn verify<const SIGMA: usize>(
         proof: &Proof<T, D, SIGMA>,
@@ -163,9 +163,9 @@ where
 }
 
 #[derive(Default)]
-pub struct InteractiveVerifier<T: Value, TapeR, D>
+pub struct InteractiveVerifier<T: Value + std::marker::Sync + std::marker::Send, TapeR, D>
 where
-    D: Default + Digest + FixedOutputReset + Clone,
+    D: Default + Digest + FixedOutputReset + Clone + std::marker::Sync + std::marker::Send,
     TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng,
 {
     challenge: Vec<u8>,
@@ -176,9 +176,9 @@ where
 
 impl<T, TapeR, D> InteractiveVerifier<T, TapeR, D>
 where
-    T: Value + PartialEq,
-    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng,
-    D: Clone + Default + Digest + FixedOutputReset,
+    T: Value + PartialEq + std::marker::Sync + std::marker::Send,
+    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng + std::marker::Send,
+    D: Clone + Default + Digest + FixedOutputReset + std::marker::Sync + std::marker::Send,
 {
     pub fn new() -> Self {
         InteractiveVerifier {

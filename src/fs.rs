@@ -58,17 +58,22 @@ impl<D: Clone + Digest> SigmaProtocolStatelessFiatShamir<D> {
     }
 }
 
-pub struct SigmaFS<D: Digest + FixedOutputReset + Clone> {
+pub struct SigmaFS<D: Digest + FixedOutputReset + Clone + std::marker::Sync + std::marker::Send> {
     hasher: D,
 }
 
-impl<D: Default + Digest + FixedOutputReset + Clone> SigmaFS<D> {
+impl<D: Default + Digest + FixedOutputReset + Clone + std::marker::Sync + std::marker::Send>
+    SigmaFS<D>
+{
     pub fn initialize(seed: &[u8]) -> Self {
         let hasher = Digest::new_with_prefix(seed);
         Self { hasher }
     }
 
-    pub fn digest_public_data<T: Value>(&mut self, pi: &PublicInput<T>) -> Result<(), Error> {
+    pub fn digest_public_data<T: Value + std::marker::Sync + std::marker::Send>(
+        &mut self,
+        pi: &PublicInput<T>,
+    ) -> Result<(), Error> {
         let data = bincode::serialize(pi).map_err(|_| Error::SerializationError)?;
         Digest::update(&mut self.hasher, &data);
         Ok(())

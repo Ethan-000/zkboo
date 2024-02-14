@@ -9,7 +9,7 @@ use crate::{
     party::Party,
 };
 
-pub fn mpc_xor<T: Value>(
+pub fn mpc_xor<T: Value + std::marker::Sync + std::marker::Send>(
     input_p1: (GF2Word<T>, GF2Word<T>),
     input_p2: (GF2Word<T>, GF2Word<T>),
     input_p3: (GF2Word<T>, GF2Word<T>),
@@ -21,7 +21,7 @@ pub fn mpc_xor<T: Value>(
     (output_p1, output_p2, output_p3)
 }
 
-pub fn mpc_and<T: Value>(
+pub fn mpc_and<T: Value + std::marker::Sync + std::marker::Send>(
     input_p1: (GF2Word<T>, GF2Word<T>),
     input_p2: (GF2Word<T>, GF2Word<T>),
     input_p3: (GF2Word<T>, GF2Word<T>),
@@ -53,7 +53,7 @@ pub fn mpc_and<T: Value>(
     (output_p1, output_p2, output_p3)
 }
 
-pub fn mpc_and_verify<T: Value>(
+pub fn mpc_and_verify<T: Value + std::marker::Sync + std::marker::Send>(
     input_p: (GF2Word<T>, GF2Word<T>),
     input_p_next: (GF2Word<T>, GF2Word<T>),
     p: &mut Party<T>,

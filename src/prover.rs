@@ -19,20 +19,22 @@ use crate::{
 
 pub type Share<T> = Vec<GF2Word<T>>;
 
-pub struct RepetitionOutput<T: Value> {
+pub struct RepetitionOutput<T: Value + std::marker::Sync + std::marker::Send> {
     pub party_outputs: TwoThreeDecOutput<T>,
     pub party_views: (View<T>, View<T>, View<T>),
 }
 
-pub struct Prover<T: Value, TapeR, D>(PhantomData<(T, TapeR, D)>)
+pub struct Prover<T: Value + std::marker::Sync + std::marker::Send, TapeR, D>(
+    PhantomData<(T, TapeR, D)>,
+)
 where
     TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng,
     D: Debug + Default + Digest + FixedOutputReset + Clone;
 
-impl<T: Value, TapeR, D> Prover<T, TapeR, D>
+impl<T: Value + std::marker::Sync + std::marker::Send, TapeR, D> Prover<T, TapeR, D>
 where
     TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng,
-    D: Debug + Default + Digest + FixedOutputReset + Clone,
+    D: Debug + Default + Digest + FixedOutputReset + Clone + std::marker::Sync + std::marker::Send,
 {
     pub fn share<R: RngCore + CryptoRng>(rng: &mut R, input: &[u8]) -> (Vec<u8>, Vec<u8>, Vec<u8>) {
         let share_1: Vec<u8> = (0..input.len()).map(|_| u8::gen_rand(rng)).collect();
@@ -180,10 +182,10 @@ where
 }
 
 #[derive(Default)]
-pub struct InteractiveProver<T: Value, TapeR, D>
+pub struct InteractiveProver<T: Value + std::marker::Sync + std::marker::Send, TapeR, D>
 where
-    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng,
-    D: Debug + Default + Digest + FixedOutputReset + Clone,
+    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng + std::marker::Send,
+    D: Debug + Default + Digest + FixedOutputReset + Clone + std::marker::Sync + std::marker::Send,
 {
     pd: PhantomData<(T, TapeR, D)>,
     pub public_output: Vec<GF2Word<T>>,
@@ -193,10 +195,10 @@ where
     key_manager: KeyManager,
 }
 
-impl<T: Value, TapeR, D> InteractiveProver<T, TapeR, D>
+impl<T: Value + std::marker::Sync + std::marker::Send, TapeR, D> InteractiveProver<T, TapeR, D>
 where
-    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng,
-    D: Debug + Default + Digest + FixedOutputReset + Clone,
+    TapeR: SeedableRng<Seed = Key> + RngCore + CryptoRng + std::marker::Send,
+    D: Debug + Default + Digest + FixedOutputReset + Clone + std::marker::Sync + std::marker::Send,
 {
     pub fn new() -> Self {
         InteractiveProver {
