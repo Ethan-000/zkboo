@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha3::Digest;
 
 use crate::{
@@ -47,7 +47,7 @@ pub struct PublicInput<'a, T: Value> {
 }
 
 // TODO: add methods for computing proofs size, etc.
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct Proof<T: Value, D, const SIGMA: usize>
 where
     D: Default + Digest + Clone,
@@ -59,7 +59,7 @@ where
     pub claimed_trits: Vec<u8>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub struct FirstMessageA<T: Value, D: Default + Digest + Clone> {
     pub outputs: Vec<Vec<GF2Word<T>>>,
     pub all_commitments: Vec<Commitment<D>>,
